@@ -166,10 +166,31 @@ class VideoColorizer:
         self.audio_root = workfolder / "audio"
         self.colorframes_root = workfolder / "colorframes"
         self.result_folder = workfolder / "result"
+        self.video_frame_output_format = 'jpg'
+        if self.video_frame_output_format == 'jpg':
+            self.extract_raw_frame_output_opts = dict(
+                format='image2', vcodec='mjpeg', pix_fmt='yuv422p', qscale=0
+            )
+            self.build_video_input_opts = dict(
+                format='image2', vcodec='mjpeg', pix_fmt='yuv422p'
+            )
+            self.build_video_ouput_opts = dict(
+                crf=17, vcodec='libx264', pix_fmt='yuv422p'
+            )
+        else:
+            self.extract_raw_frame_output_opts = dict(
+                format='image2'
+            )
+            self.build_video_input_opts = dict(
+                format='image2'
+            )
+            self.build_video_ouput_opts = dict(
+                map='0:v:0', vcodec='libx264', pix_fmt='yuv422p'
+            )
 
     def _purge_images(self, dir):
         for f in os.listdir(dir):
-            if re.search('.*?\.png', f):
+            if re.search('.*?\.' + self.video_frame_output_format, f):
                 os.remove(os.path.join(dir, f))
 
     def _get_fps(self, source_path: Path) -> str:
@@ -193,11 +214,12 @@ class VideoColorizer:
 
     def _extract_raw_frames(self, source_path: Path):
         bwframes_folder = self.bwframes_root / (source_path.stem)
-        bwframe_path_template = str(bwframes_folder / '%6d.png')
+        bwframe_path_template = str(bwframes_folder / '%6d.' + self.video_frame_output_format)
         bwframes_folder.mkdir(parents=True, exist_ok=True)
         self._purge_images(bwframes_folder)
         ffmpeg.input(str(source_path)).output(
-            str(bwframe_path_template)).run(capture_stdout=True)
+            str(bwframe_path_template), **extract_raw_frame_output_opts
+        ).run(capture_stdout=True)
 
     def _colorize_raw_frames(self, source_path: Path, render_factor: int = None):
         colorframes_folder = self.colorframes_root / (source_path.stem)
@@ -218,7 +240,7 @@ class VideoColorizer:
             source_path.name.replace('.mp4', '_no_audio.mp4')
         )
         colorframes_folder = self.colorframes_root / (source_path.stem)
-        colorframes_path_template = str(colorframes_folder / '%6d.png')
+        colorframes_path_template = str(colorframes_folder / '%6d.' + self.video_frame_output_format)
         colorized_path.parent.mkdir(parents=True, exist_ok=True)
         if colorized_path.exists():
             colorized_path.unlink()
@@ -226,8 +248,9 @@ class VideoColorizer:
 
         ffmpeg.input(
             str(colorframes_path_template),
+            **build_video_input_opts,
             framerate=fps,
-        ).output(str(colorized_path), map='0:v:0', vcodec='libx264', pix_fmt='yuv420p').run(capture_stdout=True)
+        ).output(str(colorized_path), **build_video_ouput_opts).run(capture_stdout=True)
 
         result_path = self.result_folder / source_path.name
         if result_path.exists():
