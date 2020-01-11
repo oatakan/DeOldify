@@ -218,7 +218,7 @@ class VideoColorizer:
         bwframes_folder.mkdir(parents=True, exist_ok=True)
         self._purge_images(bwframes_folder)
         ffmpeg.input(str(source_path)).output(
-            str(bwframe_path_template), **extract_raw_frame_output_opts
+            str(bwframe_path_template), **self.extract_raw_frame_output_opts
         ).run(capture_stdout=True)
 
     def _colorize_raw_frames(self, source_path: Path, render_factor: int = None):
@@ -248,9 +248,9 @@ class VideoColorizer:
 
         ffmpeg.input(
             str(colorframes_path_template),
-            **build_video_input_opts,
+            **self.build_video_input_opts,
             framerate=fps,
-        ).output(str(colorized_path), **build_video_ouput_opts).run(capture_stdout=True)
+        ).output(str(colorized_path), **self.build_video_ouput_opts).run(capture_stdout=True)
 
         result_path = self.result_folder / source_path.name
         if result_path.exists():
