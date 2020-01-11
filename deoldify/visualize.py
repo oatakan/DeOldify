@@ -169,10 +169,10 @@ class VideoColorizer:
         self.video_frame_output_format = 'jpg'
         if self.video_frame_output_format == 'jpg':
             self.extract_raw_frame_output_opts = dict(
-                format='image2', vcodec='mjpeg', pix_fmt='yuv422p', qscale=0
+                format='image2', vcodec='mjpeg', pix_fmt='yuvj422p', qscale=0
             )
             self.build_video_input_opts = dict(
-                format='image2', vcodec='mjpeg', pix_fmt='yuv422p'
+                format='image2', vcodec='mjpeg', pix_fmt='yuvj422p'
             )
             self.build_video_ouput_opts = dict(
                 crf=17, vcodec='libx264', pix_fmt='yuv422p'
@@ -185,7 +185,7 @@ class VideoColorizer:
                 format='image2'
             )
             self.build_video_ouput_opts = dict(
-                map='0:v:0', vcodec='libx264', pix_fmt='yuv422p'
+                map='0:v:0', vcodec='libx264', pix_fmt='yuv420p'
             )
 
     def _purge_images(self, dir):
