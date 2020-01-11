@@ -214,7 +214,7 @@ class VideoColorizer:
 
     def _extract_raw_frames(self, source_path: Path):
         bwframes_folder = self.bwframes_root / (source_path.stem)
-        bwframe_path_template = str(bwframes_folder / '%6d.' + self.video_frame_output_format)
+        bwframe_path_template = str(bwframes_folder / '%6d.') + str(self.video_frame_output_format)
         bwframes_folder.mkdir(parents=True, exist_ok=True)
         self._purge_images(bwframes_folder)
         ffmpeg.input(str(source_path)).output(
@@ -240,7 +240,7 @@ class VideoColorizer:
             source_path.name.replace('.mp4', '_no_audio.mp4')
         )
         colorframes_folder = self.colorframes_root / (source_path.stem)
-        colorframes_path_template = str(colorframes_folder / '%6d.' + self.video_frame_output_format)
+        colorframes_path_template = str(colorframes_folder / '%6d.') + str(self.video_frame_output_format)
         colorized_path.parent.mkdir(parents=True, exist_ok=True)
         if colorized_path.exists():
             colorized_path.unlink()
