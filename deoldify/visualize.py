@@ -172,10 +172,10 @@ class VideoColorizer:
                 format='image2', vcodec='mjpeg', pix_fmt='yuvj422p', qscale=0
             )
             self.build_video_input_opts = dict(
-                format='image2', vcodec='mjpeg', pix_fmt='yuvj422p'
+                format='image2', vcodec='mjpeg'
             )
             self.build_video_ouput_opts = dict(
-                crf=17, vcodec='libx264', pix_fmt='yuv422p'
+                crf=17, vcodec='libx264'
             )
         else:
             self.extract_raw_frame_output_opts = dict(
