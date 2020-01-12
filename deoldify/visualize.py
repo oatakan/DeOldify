@@ -174,7 +174,7 @@ class VideoColorizer:
             self.build_video_input_opts = dict(
                 format='image2', vcodec='mjpeg'
             )
-            self.build_video_ouput_opts = dict(
+            self.build_video_output_opts = dict(
                 crf=17, vcodec='libx264'
             )
         else:
@@ -184,7 +184,7 @@ class VideoColorizer:
             self.build_video_input_opts = dict(
                 format='image2'
             )
-            self.build_video_ouput_opts = dict(
+            self.build_video_output_opts = dict(
                 map='0:v:0', vcodec='libx264', pix_fmt='yuv420p'
             )
 
@@ -250,7 +250,7 @@ class VideoColorizer:
             str(colorframes_path_template),
             **self.build_video_input_opts,
             framerate=fps,
-        ).output(str(colorized_path), **self.build_video_ouput_opts).run(capture_stdout=True)
+        ).output(str(colorized_path), **self.build_video_output_opts).run(capture_stdout=True)
 
         result_path = self.result_folder / source_path.name
         if result_path.exists():
