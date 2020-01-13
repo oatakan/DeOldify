@@ -149,6 +149,7 @@ class ModelImageVisualizer:
                 color='white',
                 backgroundcolor='black',
             )
+        plt.close()
 
     def _get_num_rows_columns(self, num_images: int, max_columns: int) -> (int, int):
         columns = min(num_images, max_columns)
@@ -166,27 +167,8 @@ class VideoColorizer:
         self.audio_root = workfolder / "audio"
         self.colorframes_root = workfolder / "colorframes"
         self.result_folder = workfolder / "result"
+        self.video_output_file = self.result_folder / "video.mp4"
         self.video_frame_output_format = 'jpg'
-        if self.video_frame_output_format == 'jpg':
-            self.extract_raw_frame_output_opts = dict(
-                format='image2', vcodec='mjpeg', pix_fmt='yuvj422p', qscale=0
-            )
-            self.build_video_input_opts = dict(
-                format='image2', vcodec='mjpeg'
-            )
-            self.build_video_output_opts = dict(
-                crf=17, vcodec='libx264'
-            )
-        else:
-            self.extract_raw_frame_output_opts = dict(
-                format='image2'
-            )
-            self.build_video_input_opts = dict(
-                format='image2'
-            )
-            self.build_video_output_opts = dict(
-                map='0:v:0', vcodec='libx264', pix_fmt='yuv420p'
-            )
 
     def _purge_images(self, dir):
         for f in os.listdir(dir):
@@ -252,7 +234,8 @@ class VideoColorizer:
             framerate=fps,
         ).output(str(colorized_path), **self.build_video_output_opts).run(capture_stdout=True)
 
-        result_path = self.result_folder / source_path.name
+        result_path = self.video_output_file
+
         if result_path.exists():
             result_path.unlink()
         # making copy of non-audio version in case adding back audio doesn't apply or fails.
@@ -277,7 +260,8 @@ class VideoColorizer:
                 + str(colorized_path)
                 + '" -i "'
                 + str(audio_file)
-                + '" -strict -2 -shortest -c:v copy -c:a aac -b:a 256k "'
+                # + '" -strict -2 -shortest -c:v copy -c:a aac -b:a 256k "'
+                + '" -strict -2 -map 0:v:0 -map 1:a:0 -c:v libx264 -y "'
                 + str(result_path)
                 + '"'
             )
@@ -301,6 +285,27 @@ class VideoColorizer:
         if not source_path.exists():
             raise Exception(
                 'Video at path specfied, ' + str(source_path) + ' could not be found.'
+            )
+
+        if self.video_frame_output_format == 'jpg':
+            self.extract_raw_frame_output_opts = dict(
+                format='image2', vcodec='mjpeg', pix_fmt='yuvj422p', qscale=0
+            )
+            self.build_video_input_opts = dict(
+                format='image2', vcodec='mjpeg'
+            )
+            self.build_video_output_opts = dict(
+                crf=17, vcodec='libx264'
+            )
+        else:
+            self.extract_raw_frame_output_opts = dict(
+                pix_fmt='yuv420p'
+            )
+            self.build_video_input_opts = dict(
+                pix_fmt='yuv420p'
+            )
+            self.build_video_output_opts = dict(
+                map='0:v:0', vcodec='libx264', pix_fmt='yuv420p'
             )
 
         self._extract_raw_frames(source_path)
