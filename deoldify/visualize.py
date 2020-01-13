@@ -199,7 +199,7 @@ class VideoColorizer:
         bwframe_path_template = str(bwframes_folder / '%6d.') + str(self.video_frame_output_format)
         bwframes_folder.mkdir(parents=True, exist_ok=True)
         self._purge_images(bwframes_folder)
-        ffmpeg.input(str(source_path)).output(
+        ffmpeg.input(str(source_path), analyzeduration=10000000).output(
             str(bwframe_path_template), **self.extract_raw_frame_output_opts
         ).run(capture_stdout=True)
 
@@ -298,12 +298,8 @@ class VideoColorizer:
                 crf=17, vcodec='libx264'
             )
         else:
-            self.extract_raw_frame_output_opts = dict(
-                pix_fmt='yuv420p'
-            )
-            self.build_video_input_opts = dict(
-                pix_fmt='yuv420p'
-            )
+            self.extract_raw_frame_output_opts = dict()
+            self.build_video_input_opts = dict()
             self.build_video_output_opts = dict(
                 map='0:v:0', vcodec='libx264', pix_fmt='yuv420p'
             )
